@@ -27,7 +27,7 @@ public class Main {
   }
 
   public static int max(int[] array) {
-    int max = array[0];
+    var max = array[0];
     for (var i = 0; i < array.length; i += SPECIES.length()) {
       var mask = SPECIES.indexInRange(i, array.length);
       var vector = IntVector.fromArray(SPECIES, array, i, mask);
@@ -38,7 +38,7 @@ public class Main {
   }
 
   public static int sum(int[] array) {
-    int sum = array[0];
+    var sum = array[0];
     for (var i = 0; i < array.length; i += SPECIES.length()) {
       var mask = SPECIES.indexInRange(i, array.length);
       var vector = IntVector.fromArray(SPECIES, array, i, mask);

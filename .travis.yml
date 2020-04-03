@@ -8,4 +8,4 @@ install:
   - java pro_wrapper.java version
 
 script:
-  - ./pro/bin/pro
+  - ./pro/bin/pro perfer

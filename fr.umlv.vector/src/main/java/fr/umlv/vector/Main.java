@@ -38,7 +38,7 @@ public class Main {
   }
 
   public static int sum(int[] array) {
-    var sum = array[0];
+    var sum = 0;
     for (var i = 0; i < array.length; i += SPECIES.length()) {
       var mask = SPECIES.indexInRange(i, array.length);
       var vector = IntVector.fromArray(SPECIES, array, i, mask);

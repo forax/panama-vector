@@ -8,5 +8,22 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../deps/org.opentest4j.jar!/" />
+          <root url="jar://$MODULE_DIR$/../deps/org.openjdk.jmh.jar!/" />
+          <root url="jar://$MODULE_DIR$/../deps/net.sf.jopt-simple.jar!/" />
+          <root url="jar://$MODULE_DIR$/../deps/org.apiguardian.api.jar!/" />
+          <root url="jar://$MODULE_DIR$/../deps/org.junit.jupiter.api.jar!/" />
+          <root url="jar://$MODULE_DIR$/../deps/org.apache.commons.math3.jar!/" />
+          <root url="jar://$MODULE_DIR$/../deps/org.junit.jupiter.params.jar!/" />
+          <root url="jar://$MODULE_DIR$/../deps/org.openjdk.jmh.generator.jar!/" />
+          <root url="jar://$MODULE_DIR$/../deps/org.junit.platform.commons.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

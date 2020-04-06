@@ -60,7 +60,8 @@ public class MaxBenchMark {
 
   @Benchmark
   public int max_vector_lanewise() {
-    var acc = IntVector.broadcast(SPECIES, Integer.MIN_VALUE);
+    //var acc = IntVector.broadcast(SPECIES, Integer.MIN_VALUE);
+    var acc = (IntVector)SPECIES.broadcast(Integer.MIN_VALUE);
     var i = 0;
     var limit = array.length - (array.length % SPECIES.length());
     for (; i < limit; i += SPECIES.length()) {

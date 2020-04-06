@@ -23,7 +23,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @SuppressWarnings("static-method")
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
-@Fork(value = 1, jvmArgsAppend = { "-XX:+UnlockExperimentalVMOptions", "-XX:+EnableVectorSupport", "-XX:-UseSuperWord"})
+@Fork(value = 1, jvmArgsAppend = { "-XX:+UnlockExperimentalVMOptions", "-XX:+EnableVectorSupport"/*, "-XX:-UseSuperWord"*/})
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Benchmark)
@@ -56,6 +56,25 @@ public class AddBenchMark {
     }
     return sum;
   }
+
+  /*
+  @Benchmark
+  public int add_vector_post_with_mask() {
+    var sum = 0;
+    var i = 0;
+    var limit = array.length - (array.length % SPECIES.length());
+    // main loop
+    for (; i < limit; i += SPECIES.length()) {
+      var vector = IntVector.fromArray(SPECIES, array, i);
+      var result = vector.reduceLanes(VectorOperators.ADD);
+      sum +=result;
+    }
+    // post loop
+    var mask = SPECIES.indexInRange(i, array.length);
+    var vector = IntVector.fromArray(SPECIES, array, i, mask);
+    var result = vector.reduceLanes(VectorOperators.ADD, mask);
+    return sum + result;
+  }*/
 
   @Benchmark
   public int add_vector_lanewise() {

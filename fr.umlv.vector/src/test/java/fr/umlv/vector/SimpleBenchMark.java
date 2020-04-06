@@ -56,16 +56,61 @@ public class SimpleBenchMark {
 //  }
 
   @Benchmark
-  public void max_loop(Blackhole blackhole) {
+  public int max_vector_post_loop() {
     var max = Integer.MIN_VALUE;
-    for (var i = 0; i < array.length; i++) {
+    var i = 0;
+    var limit = array.length - (array.length % SPECIES.length());
+    for (; i < limit; i += SPECIES.length()) {
+      var vector = IntVector.fromArray(SPECIES, array, i);
+      var result = vector.reduceLanes(VectorOperators.MAX);
+      max = Math.max(max, result);
+    }
+    for (; i < array.length; i += 1) {
       max = Math.max(max, array[i]);
     }
-    blackhole.consume(max);
+    return max;
   }
 
   @Benchmark
-  public void max_vector(Blackhole blackhole) {
+  public int max_vector_lanewise() {
+    var acc = IntVector.broadcast(SPECIES, Integer.MIN_VALUE);
+    var i = 0;
+    var limit = array.length - (array.length % SPECIES.length());
+    for (; i < limit; i += SPECIES.length()) {
+      var vector = IntVector.fromArray(SPECIES, array, i);
+      acc = acc.lanewise(VectorOperators.MAX, vector) ;
+    }
+    var max = acc.reduceLanes(VectorOperators.MAX);
+    for (; i < array.length; i++) {
+      max = Math.max(max, array[i]);
+    }
+    return max;
+  }
+
+  @Benchmark
+  public int max_vector_lanewise_unrolled2() {
+    var acc1 = IntVector.broadcast(SPECIES, Integer.MIN_VALUE);
+    var acc2 = IntVector.broadcast(SPECIES, Integer.MIN_VALUE);
+    var i = 0;
+    var limit = array.length - (array.length % (2 * SPECIES.length()));
+    for (; i < limit; i += 2 * SPECIES.length()) {
+      acc1 = acc1.lanewise(VectorOperators.MAX,
+          IntVector.fromArray(SPECIES, array, i + 0 * SPECIES.length()));
+      acc2 = acc2.lanewise(VectorOperators.MAX,
+          IntVector.fromArray(SPECIES, array, i + 1 * SPECIES.length()));
+    }
+    var max = Math.max(
+        acc1.reduceLanes(VectorOperators.MAX),
+        acc2.reduceLanes(VectorOperators.MAX));
+    for (; i < array.length; i += 1) {
+      max = Math.max(max, array[i]);
+    }
+    return max;
+  }
+
+  /*
+  @Benchmark
+  public int max_vector_mask() {
     var max = Integer.MIN_VALUE;
     for (var i = 0; i < array.length; i += SPECIES.length()) {
       var mask = SPECIES.indexInRange(i, array.length);
@@ -73,8 +118,18 @@ public class SimpleBenchMark {
       var result = vector.reduceLanes(VectorOperators.MAX, mask);
       max = Math.max(max, result);
     }
+    return max;
+  }*/
+
+  /*
+  @Benchmark
+  public void max_loop(Blackhole blackhole) {
+    var max = Integer.MIN_VALUE;
+    for (var i = 0; i < array.length; i++) {
+      max = Math.max(max, array[i]);
+    }
     blackhole.consume(max);
-  }
+  }*/
 
   public static void main(String[] args) throws RunnerException {
     var opt = new OptionsBuilder().include(SimpleBenchMark.class.getName()).build();

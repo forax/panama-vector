@@ -32,7 +32,9 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class SimpleBenchMark {
   private static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
-  private int[] array = new Random(0).ints(1_000_000, 0,1_000_000).toArray();
+  //private int[] array = new Random(0).ints(1_000_000, 0,1_000_000).toArray();
+  private int[] array = new Random(0).ints(1<<20, 0,1<<20).toArray();
+
 
 //  @Benchmark
 //  public void sum_loop(Blackhole blackhole) {

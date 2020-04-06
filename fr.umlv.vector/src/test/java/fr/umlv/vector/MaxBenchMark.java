@@ -14,14 +14,13 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 
 
-// /path/to/jdk-15-vector/bin/java --module-path target/test/artifact:deps -m fr.umlv.vector/fr.umlv.vector.SimpleBenchMark
+// /path/to/jdk-15-vector/bin/java --module-path target/test/artifact:deps -m fr.umlv.vector/fr.umlv.vector.MaxBenchMark
 @SuppressWarnings("static-method")
 @Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
@@ -29,33 +28,19 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Benchmark)
-public class SimpleBenchMark {
+public class MaxBenchMark {
   private static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
-  //private int[] array = new Random(0).ints(1_000_000, 0,1_000_000).toArray();
-  private int[] array = new Random(0).ints(1<<20, 0,1<<20).toArray();
+  private int[] array = new Random(0).ints(1_000_000, 0,1_000_000).toArray();
 
-
-//  @Benchmark
-//  public void sum_loop(Blackhole blackhole) {
-//    var sum = 0;
-//    for (var i = 0; i < array.length; i++) {
-//      sum += array[i];
-//    }
-//    blackhole.consume(sum);
-//  }
-//
-//  @Benchmark
-//  public void sum_vector(Blackhole blackhole) {
-//    var sum = 0;
-//    for (var i = 0; i < array.length; i += SPECIES.length()) {
-//      var mask = SPECIES.indexInRange(i, array.length);
-//      var vector = IntVector.fromArray(SPECIES, array, i, mask);
-//      var result = vector.reduceLanes(VectorOperators.ADD, mask);
-//      sum += result;
-//    }
-//    blackhole.consume(sum);
-//  }
+  @Benchmark
+  public int max_loop() {
+    var max = Integer.MIN_VALUE;
+    for (var i = 0; i < array.length; i++) {
+      max = Math.max(max, array[i]);
+    }
+    return max;
+  }
 
   @Benchmark
   public int max_vector_post_loop() {
@@ -89,6 +74,7 @@ public class SimpleBenchMark {
     return max;
   }
 
+  /*
   @Benchmark
   public int max_vector_lanewise_unrolled2() {
     var acc1 = IntVector.broadcast(SPECIES, Integer.MIN_VALUE);
@@ -109,6 +95,7 @@ public class SimpleBenchMark {
     }
     return max;
   }
+  */
 
   /*
   @Benchmark
@@ -123,18 +110,8 @@ public class SimpleBenchMark {
     return max;
   }*/
 
-  /*
-  @Benchmark
-  public void max_loop(Blackhole blackhole) {
-    var max = Integer.MIN_VALUE;
-    for (var i = 0; i < array.length; i++) {
-      max = Math.max(max, array[i]);
-    }
-    blackhole.consume(max);
-  }*/
-
   public static void main(String[] args) throws RunnerException {
-    var opt = new OptionsBuilder().include(SimpleBenchMark.class.getName()).build();
+    var opt = new OptionsBuilder().include(MaxBenchMark.class.getName()).build();
     new Runner(opt).run();
   }
 }

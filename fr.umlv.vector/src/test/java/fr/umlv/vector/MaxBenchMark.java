@@ -65,7 +65,8 @@ public class MaxBenchMark {
     var limit = array.length - (array.length % SPECIES.length());
     for (; i < limit; i += SPECIES.length()) {
       var vector = IntVector.fromArray(SPECIES, array, i);
-      acc = acc.lanewise(VectorOperators.MAX, vector) ;
+      // acc = acc.lanewise(VectorOperators.MAX, vector);
+      acc = acc.max(vector) ;
     }
     var max = acc.reduceLanes(VectorOperators.MAX);
     for (; i < array.length; i++) {
@@ -97,7 +98,7 @@ public class MaxBenchMark {
   }
   */
 
-  /*
+
   @Benchmark
   public int max_vector_mask() {
     var max = Integer.MIN_VALUE;
@@ -108,7 +109,7 @@ public class MaxBenchMark {
       max = Math.max(max, result);
     }
     return max;
-  }*/
+  }
 
   public static void main(String[] args) throws RunnerException {
     var opt = new OptionsBuilder().include(MaxBenchMark.class.getName()).build();

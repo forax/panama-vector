@@ -83,7 +83,8 @@ public class AddBenchMark {
     var limit = array.length - (array.length % SPECIES.length());
     for (; i < limit; i += SPECIES.length()) {
       var vector = IntVector.fromArray(SPECIES, array, i);
-      acc = acc.lanewise(VectorOperators.ADD, vector) ;
+      //acc = acc.lanewise(VectorOperators.ADD, vector) ;
+      acc = acc.add(vector);
     }
     var sum = acc.reduceLanes(VectorOperators.ADD);
     for (; i < array.length; i++) {

@@ -12,4 +12,5 @@ install:
   - java pro_wrapper.java version
 
 script:
-  - ./pro/bin/pro build perfer
+  - ./pro/bin/pro build
+#  - ./pro/bin/pro build perfer

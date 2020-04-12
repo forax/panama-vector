@@ -21,13 +21,18 @@ resolver.
       )
 
 compiler.
+      enablePreview(true).
       sourceRelease(15).
       processorModuleTestPath(path("deps"))// enable JMH annotation processor
+
 
 packager.
       modules("fr.umlv.vector@1.0/fr.umlv.vector.Main")
 
-run(resolver, modulefixer, compiler, /*tester,*/ packager, runner)
+runner.
+    enablePreview(true)
+
+run(resolver, modulefixer, compiler, tester, packager, runner)
 
 pro.arguments().forEach(plugin -> run(plugin))   // run command line defined plugins
 

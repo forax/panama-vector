@@ -18,13 +18,13 @@ public final class Cell {
     int[] depths();
     default int elements() { return Arrays.stream(depths()).reduce(1, (a, b) -> a * b); }
 
-    Cell fold(Cell self, int rank, Dyad dyad);
+    // inlined by hand, see Cell#apply(Fold)
+    //Cell fold(Cell self, int rank, Dyad dyad);
 
     record Vector(int column)  implements Rank {
       @Override
       public int[] depths() { return new int[] { column }; }
 
-      @Override
       public Cell fold(Cell self, int rank, Dyad dyad) {
         return foldValue(self, dyad);
       }
@@ -37,7 +37,6 @@ public final class Cell {
       @Override
       public int[] depths() { return new int[] { row, column }; }
 
-      @Override
       public Cell fold(Cell self, int rank, Dyad dyad) {
         return switch(rank) {
           case 1 -> foldVectorRow(self, dyad, row, column);
@@ -60,7 +59,6 @@ public final class Cell {
       @Override
       public int[] depths() { return new int[] {plane, row, column}; }
 
-      @Override
       public Cell fold(Cell self, int rank, Dyad dyad) {
         return switch(rank) {
           case 1 -> foldMatrixRow(self, dyad, plane, row, column);
@@ -172,7 +170,7 @@ public final class Cell {
     }
   }
 
-  public static class Fold {
+  public static /*inline*/ class Fold {
     private final int rank;
     private final Fold left;
     private final Dyad dyad;
@@ -296,7 +294,17 @@ public final class Cell {
     if (fold.foldVerbs()) { // implicit nullcheck
       return apply(fold.left).apply(fold.dyad, apply(fold.right));
     }
-    return rank.fold(this, fold.rank, fold.dyad);
+    // hand inlined
+    if (rank instanceof Rank.Vector vector) {
+      return vector.fold(this, fold.rank, fold.dyad);
+    }
+    if (rank instanceof Rank.Matrix matrix) {
+      return matrix.fold(this, fold.rank, fold.dyad);
+    }
+    if (rank instanceof Rank.Cube cube) {
+      return cube.fold(this, fold.rank, fold.dyad);
+    }
+    throw new AssertionError();
   }
 
 

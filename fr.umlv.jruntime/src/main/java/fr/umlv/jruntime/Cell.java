@@ -318,11 +318,16 @@ public final class Cell {
   // --- backend implementation ---
   private static final Backend BACKEND;
   static {
+    var enableVectorizedBackend = Boolean.parseBoolean(System.getProperty("fr.umlv.jruntime.vectorized", "true"));
     Backend backend;
-    try {
-      Class.forName("jdk.incubator.vector.IntVector");
-      backend = new VectorizedBackend();
-    } catch(ClassNotFoundException e) {
+    if (enableVectorizedBackend) {
+      try {
+        Class.forName("jdk.incubator.vector.IntVector");
+        backend = new VectorizedBackend();
+      } catch(ClassNotFoundException e) {
+        backend = new ClassicBackend();
+      }
+    } else {
       backend = new ClassicBackend();
     }
     BACKEND = backend;

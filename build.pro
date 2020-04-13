@@ -32,7 +32,8 @@ packager.
           "fr.umlv.vector@1.0/fr.umlv.vector.Main");
 
 runner.
-    enablePreview(true)
+    enablePreview(true).
+    module("fr.umlv.vector")
 
 run(resolver, modulefixer, compiler, tester, packager, runner)
 

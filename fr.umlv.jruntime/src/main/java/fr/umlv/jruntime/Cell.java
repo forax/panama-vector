@@ -34,7 +34,7 @@ public final class Cell {
     }
     record Matrix(int row, int column) implements Rank {
       @Override
-      public int[] depths() { return new int[] {row, column}; }
+      public int[] depths() { return new int[] { row, column }; }
 
       @Override
       public Cell fold(Cell self, int rank, Dyad dyad) {

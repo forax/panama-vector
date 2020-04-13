@@ -10,6 +10,7 @@ import jdk.incubator.vector.IntVector;
 import jdk.incubator.vector.VectorOperators;
 import jdk.incubator.vector.VectorOperators.Associative;
 import jdk.incubator.vector.VectorOperators.Binary;
+import jdk.incubator.vector.VectorOperators.Unary;
 import jdk.incubator.vector.VectorSpecies;
 
 public final class Cell {
@@ -692,61 +693,61 @@ public final class Cell {
       return "Vectorized - lanes: " + SPECIES.length() + "  shape: " + SPECIES.vectorShape();
     }
 
-    int[] applyUnaryZOMO(int[] src) { return applyUnaryGeneric(src, x -> x == 0? 0: -1, VectorOperators.ZOMO);  }
-    int[] applyUnaryNEG(int[] src) { return applyUnaryGeneric(src, x -> -x, VectorOperators.NEG);  }
-    int[] applyUnaryABS(int[] src) { return applyUnaryGeneric(src, Math::abs, VectorOperators.ABS);  }
-    int[] applyUnaryNOT(int[] src) { return applyUnaryGeneric(src, x -> ~x, VectorOperators.NOT);  }
+    int[] applyUnaryZOMO(int[] src) { return applyUnaryTemplate(src, x -> x == 0? 0: -1, VectorOperators.ZOMO);  }
+    int[] applyUnaryNEG(int[] src) { return applyUnaryTemplate(src, x -> -x, VectorOperators.NEG);  }
+    int[] applyUnaryABS(int[] src) { return applyUnaryTemplate(src, Math::abs, VectorOperators.ABS);  }
+    int[] applyUnaryNOT(int[] src) { return applyUnaryTemplate(src, x -> ~x, VectorOperators.NOT);  }
 
-    int[] applyBinaryADD(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, Integer::sum, VectorOperators.ADD); }
-    int[] applyBinarySUB(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, (a, b) -> a - b, VectorOperators.SUB); }
-    int[] applyBinaryMUL(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, (a, b) -> a * b, VectorOperators.MUL); }
-    int[] applyBinaryDIV(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, (a, b) -> a / b, VectorOperators.DIV); }
-    int[] applyBinaryMAX(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, Math::max, VectorOperators.MAX); }
-    int[] applyBinaryMIN(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, Math::min, VectorOperators.MIN); }
-    int[] applyBinaryAND(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, (a, b) -> a & b, VectorOperators.AND); }
-    int[] applyBinaryAND_NOT(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
-    int[] applyBinaryOR(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, (a, b) -> a & ~b, VectorOperators.OR); }
-    int[] applyBinaryXOR(int[] src1, int[] src2) { return applyBinaryGeneric(src1, src2, (a, b) -> a ^b, VectorOperators.XOR); }
+    int[] applyBinaryADD(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, Integer::sum, VectorOperators.ADD); }
+    int[] applyBinarySUB(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a - b, VectorOperators.SUB); }
+    int[] applyBinaryMUL(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a * b, VectorOperators.MUL); }
+    int[] applyBinaryDIV(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a / b, VectorOperators.DIV); }
+    int[] applyBinaryMAX(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, Math::max, VectorOperators.MAX); }
+    int[] applyBinaryMIN(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, Math::min, VectorOperators.MIN); }
+    int[] applyBinaryAND(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a & b, VectorOperators.AND); }
+    int[] applyBinaryAND_NOT(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
+    int[] applyBinaryOR(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a & ~b, VectorOperators.OR); }
+    int[] applyBinaryXOR(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a ^b, VectorOperators.XOR); }
     int[] applyBinaryCOUNT(int[] src1, int[] src2) { return ClassicBackend.applyBinaryGeneric(src1, src2, (a, b) -> a + 1); }
 
-    int foldValueADD(int[] src) { return foldValueGeneric(src, 0, Integer::sum, VectorOperators.ADD); }
-    int foldValueSUB(int[] src) { return foldValueGeneric(src, 0, (a, b) -> a - b, VectorOperators.SUB); }
-    int foldValueMUL(int[] src) { return foldValueGeneric(src, 1, (a, b) -> a * b, VectorOperators.MUL); }
-    int foldValueDIV(int[] src) { return foldValueGeneric(src, 1, (a, b) -> a / b, VectorOperators.DIV); }
-    int foldValueMAX(int[] src) { return foldValueGeneric(src, Integer.MIN_VALUE, Math::max, VectorOperators.MAX); }
-    int foldValueMIN(int[] src) { return foldValueGeneric(src, Integer.MAX_VALUE, Math::min, VectorOperators.MIN); }
-    int foldValueAND(int[] src) { return foldValueGeneric(src, 0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND); }
-    int foldValueAND_NOT(int[] src) { return foldValueGeneric(src, 0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
-    int foldValueOR(int[] src) { return foldValueGeneric(src, 0, (a, b) -> a | b, VectorOperators.OR); }
-    int foldValueXOR(int[] src) { return foldValueGeneric(src, 0, (a, b) -> a ^ b, VectorOperators.XOR); }
+    int foldValueADD(int[] src) { return foldValueTemplate(src, 0, Integer::sum, VectorOperators.ADD); }
+    int foldValueSUB(int[] src) { return foldValueTemplate(src, 0, (a, b) -> a - b, VectorOperators.SUB); }
+    int foldValueMUL(int[] src) { return foldValueTemplate(src, 1, (a, b) -> a * b, VectorOperators.MUL); }
+    int foldValueDIV(int[] src) { return foldValueTemplate(src, 1, (a, b) -> a / b, VectorOperators.DIV); }
+    int foldValueMAX(int[] src) { return foldValueTemplate(src, Integer.MIN_VALUE, Math::max, VectorOperators.MAX); }
+    int foldValueMIN(int[] src) { return foldValueTemplate(src, Integer.MAX_VALUE, Math::min, VectorOperators.MIN); }
+    int foldValueAND(int[] src) { return foldValueTemplate(src, 0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND); }
+    int foldValueAND_NOT(int[] src) { return foldValueTemplate(src, 0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
+    int foldValueOR(int[] src) { return foldValueTemplate(src, 0, (a, b) -> a | b, VectorOperators.OR); }
+    int foldValueXOR(int[] src) { return foldValueTemplate(src, 0, (a, b) -> a ^ b, VectorOperators.XOR); }
     int foldValueCOUNT(int[] src) { return ClassicBackend.foldValueGeneric(src, 0, (a, b) -> a + 1); }
 
-    void foldVectorRowADD(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 0, Integer::sum, VectorOperators.ADD); }
-    void foldVectorRowSUB(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a - b, VectorOperators.SUB); }
-    void foldVectorRowMUL(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 1, (a, b) -> a * b, VectorOperators.MUL); }
-    void foldVectorRowDIV(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 1, (a, b) -> a / b, VectorOperators.DIV); }
-    void foldVectorRowMAX(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, Integer.MIN_VALUE, Math::max, VectorOperators.MAX); }
-    void foldVectorRowMIN(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, Integer.MAX_VALUE, Math::min, VectorOperators.MIN); }
-    void foldVectorRowAND(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND); }
-    void foldVectorRowAND_NOT(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
-    void foldVectorRowOR(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a | b, VectorOperators.OR); }
-    void foldVectorRowXOR(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a ^ b, VectorOperators.XOR); }
+    void foldVectorRowADD(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0, Integer::sum, VectorOperators.ADD); }
+    void foldVectorRowSUB(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a - b, VectorOperators.SUB); }
+    void foldVectorRowMUL(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 1, (a, b) -> a * b, VectorOperators.MUL); }
+    void foldVectorRowDIV(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 1, (a, b) -> a / b, VectorOperators.DIV); }
+    void foldVectorRowMAX(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, Integer.MIN_VALUE, Math::max, VectorOperators.MAX); }
+    void foldVectorRowMIN(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, Integer.MAX_VALUE, Math::min, VectorOperators.MIN); }
+    void foldVectorRowAND(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND); }
+    void foldVectorRowAND_NOT(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
+    void foldVectorRowOR(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a | b, VectorOperators.OR); }
+    void foldVectorRowXOR(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a ^ b, VectorOperators.XOR); }
     void foldVectorRowCOUNT(int[] dst, int[] src, int rowCount, int columnCount) { ClassicBackend.foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a + 1); }
 
-    void foldVectorRowADD(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, Integer::sum, VectorOperators.ADD); }
-    void foldVectorRowSUB(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a - b, VectorOperators.SUB); }
-    void foldVectorRowMUL(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 1, (a, b) -> a * b, VectorOperators.MUL); }
-    void foldVectorRowDIV(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 1, (a, b) -> a / b, VectorOperators.DIV); }
-    void foldVectorRowMAX(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, Integer.MIN_VALUE, Math::max, VectorOperators.MAX); }
-    void foldVectorRowMIN(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, Integer.MAX_VALUE, Math::min, VectorOperators.MIN); }
-    void foldVectorRowAND(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND); }
-    void foldVectorRowAND_NOT(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
-    void foldVectorRowOR(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a | b, VectorOperators.OR); }
-    void foldVectorRowXOR(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a ^ b, VectorOperators.XOR); }
+    void foldVectorRowADD(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, Integer::sum, VectorOperators.ADD); }
+    void foldVectorRowSUB(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a - b, VectorOperators.SUB); }
+    void foldVectorRowMUL(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 1, (a, b) -> a * b, VectorOperators.MUL); }
+    void foldVectorRowDIV(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 1, (a, b) -> a / b, VectorOperators.DIV); }
+    void foldVectorRowMAX(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, Integer.MIN_VALUE, Math::max, VectorOperators.MAX); }
+    void foldVectorRowMIN(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, Integer.MAX_VALUE, Math::min, VectorOperators.MIN); }
+    void foldVectorRowAND(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND); }
+    void foldVectorRowAND_NOT(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
+    void foldVectorRowOR(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a | b, VectorOperators.OR); }
+    void foldVectorRowXOR(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a ^ b, VectorOperators.XOR); }
     void foldVectorRowCOUNT(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { ClassicBackend.foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a + 1); }
 
 
-    private static int[] applyUnaryGeneric(int[] src, IntUnaryOperator op, VectorOperators.Unary unary) {
+    private static int[] applyUnaryTemplate(int[] src, IntUnaryOperator op, Unary unary) {
       var data = new int[src.length];
       var i = 0;
       var limit = src.length - (src.length % SPECIES.length());
@@ -760,7 +761,7 @@ public final class Cell {
       }
       return data;
     }
-    private static int[] applyBinaryGeneric(int[] src1, int[] src2, IntBinaryOperator op, Binary binary) {
+    private static int[] applyBinaryTemplate(int[] src1, int[] src2, IntBinaryOperator op, Binary binary) {
       var data = new int[src1.length];
       var i = 0;
       var limit = src1.length - (src1.length % SPECIES.length());
@@ -775,7 +776,7 @@ public final class Cell {
       }
       return data;
     }
-    private static int foldValueGeneric(int[] src, int zero, IntBinaryOperator op, Associative assoc) {
+    private static int foldValueTemplate(int[] src, int zero, IntBinaryOperator op, Associative assoc) {
       var acc = IntVector.broadcast(SPECIES, zero);
       var i = 0;
       var limit = src.length - (src.length % SPECIES.length());
@@ -789,7 +790,7 @@ public final class Cell {
       }
       return result;
     }
-    private static int foldValueGeneric(int[] src, int zero, IntBinaryOperator op, Binary binary) {
+    private static int foldValueTemplate(int[] src, int zero, IntBinaryOperator op, Binary binary) {
       var acc = IntVector.broadcast(SPECIES, zero);
       var i = 0;
       var limit = src.length - (src.length % SPECIES.length());
@@ -806,7 +807,7 @@ public final class Cell {
       }
       return result;
     }
-    private static void foldVectorRowGeneric(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount, int zero, IntBinaryOperator op, Associative assoc) {
+    private static void foldVectorRowTemplate(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount, int zero, IntBinaryOperator op, Associative assoc) {
       var index = srcOffset;
       for(var j = 0; j < rowCount; j++) {
         var acc = IntVector.broadcast(SPECIES, zero);
@@ -825,7 +826,7 @@ public final class Cell {
       }
     }
 
-    private static void foldVectorRowGeneric(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount, int zero, IntBinaryOperator op, Binary binary) {
+    private static void foldVectorRowTemplate(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount, int zero, IntBinaryOperator op, Binary binary) {
       var index = srcOffset;
       for(var j = 0; j < rowCount; j++) {
         var acc = IntVector.broadcast(SPECIES, zero);

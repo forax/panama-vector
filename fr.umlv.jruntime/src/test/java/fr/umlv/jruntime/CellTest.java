@@ -1,11 +1,11 @@
-package fr.umlv.vector;
+package fr.umlv.jruntime;
 
-import static fr.umlv.vector.Cell.Dyads.*;
-import static fr.umlv.vector.Cell.Monads.*;
+import static fr.umlv.jruntime.Cell.Dyads.*;
+import static fr.umlv.jruntime.Cell.Monads.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.umlv.vector.Cell.Dyad;
-import fr.umlv.vector.Cell.Monad;
+import fr.umlv.jruntime.Cell.Dyad;
+import fr.umlv.jruntime.Cell.Monad;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 

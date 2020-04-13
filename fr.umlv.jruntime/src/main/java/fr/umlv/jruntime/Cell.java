@@ -1,4 +1,4 @@
-package fr.umlv.vector;
+package fr.umlv.jruntime;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.IntStream.range;
@@ -328,6 +328,8 @@ public final class Cell {
     BACKEND = backend;
   }
 
+  public static String backendVersion() { return BACKEND.toString(); }
+
   private static abstract class Backend {
     private int[] applyUnary(Monad monad, int[] src) {
       if (monad instanceof Monads monads) {
@@ -565,6 +567,11 @@ public final class Cell {
   }
 
   private static final class ClassicBackend extends Backend {
+    @Override
+    public String toString() {
+      return "Classic";
+    }
+
     int[] applyUnaryZOMO(int[] src) { return applyUnaryGeneric(src, x -> x == 0? 0: -1);  }
     int[] applyUnaryNEG(int[] src) { return applyUnaryGeneric(src, x -> -x);  }
     int[] applyUnaryABS(int[] src) { return applyUnaryGeneric(src, Math::abs);  }
@@ -674,6 +681,11 @@ public final class Cell {
 
   private static final class VectorizedBackend extends Backend {
     private static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
+
+    @Override
+    public String toString() {
+      return "Vectorized - lanes: " + SPECIES.length() + "  shape: " + SPECIES.vectorShape();
+    }
 
     int[] applyUnaryZOMO(int[] src) { return applyUnaryGeneric(src, x -> x == 0? 0: -1, VectorOperators.ZOMO);  }
     int[] applyUnaryNEG(int[] src) { return applyUnaryGeneric(src, x -> -x, VectorOperators.NEG);  }

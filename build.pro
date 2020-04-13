@@ -23,11 +23,13 @@ resolver.
 compiler.
       enablePreview(true).
       sourceRelease(15).
-      processorModuleTestPath(path("deps"))// enable JMH annotation processor
-
+      processorModuleTestPath(path("deps")). // enable JMH annotation processor
+      rawArguments("--default-module-for-created-files", "fr.umlv.vector")
 
 packager.
-      modules("fr.umlv.vector@1.0/fr.umlv.vector.Main")
+      modules(
+          "fr.umlv.jruntime@1.0/fr.umlv.jruntime.Main",
+          "fr.umlv.vector@1.0/fr.umlv.vector.Main");
 
 runner.
     enablePreview(true)

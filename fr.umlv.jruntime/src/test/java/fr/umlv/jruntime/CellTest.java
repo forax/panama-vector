@@ -174,6 +174,12 @@ public class CellTest {
     assertEquals(Cell.of(2), r);
   }
 
+  @Test
+  public void testApplyVectorFoldComplexRank1() {
+    var a = Cell.of(1, 2, 3);
+    var r = a.apply(ADD.fold(1, DIV, COUNT));
+    assertEquals(Cell.of(2), r);
+  }
 
   @Test
   public void iota() {

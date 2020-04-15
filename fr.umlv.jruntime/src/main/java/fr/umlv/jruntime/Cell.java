@@ -1,8 +1,10 @@
 package fr.umlv.jruntime;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
@@ -12,6 +14,7 @@ import jdk.incubator.vector.VectorOperators.Associative;
 import jdk.incubator.vector.VectorOperators.Binary;
 import jdk.incubator.vector.VectorOperators.Unary;
 import jdk.incubator.vector.VectorSpecies;
+import sun.misc.Unsafe;
 
 public final class Cell {
   private /*sealed*/ interface Rank {
@@ -334,6 +337,7 @@ public final class Cell {
         Class.forName("jdk.incubator.vector.IntVector");
         backend = new VectorizedBackend();
       } catch(ClassNotFoundException e) {
+        // fallback
         backend = new ClassicBackend();
       }
     } else {
@@ -377,19 +381,25 @@ public final class Cell {
 
     private int foldValue(Dyad dyad, int[] src) {
       if (dyad instanceof Dyads dyads) {
-        return switch(dyads) {
-          case ADD -> foldValueADD(src);
-          case SUB -> foldValueSUB(src);
-          case MUL -> foldValueMUL(src);
-          case DIV -> foldValueDIV(src);
-          case MAX -> foldValueMAX(src);
-          case MIN -> foldValueMIN(src);
-          case AND -> foldValueAND(src);
-          case AND_NOT -> foldValueAND_NOT(src);
-          case OR -> foldValueOR(src);
-          case XOR -> foldValueXOR(src);
-          case COUNT -> foldValueCOUNT(src);
-        };
+        try {
+          return switch(dyads) {
+            case ADD -> foldValueADD(src);
+            case SUB -> foldValueSUB(src);
+            case MUL -> foldValueMUL(src);
+            case DIV -> foldValueDIV(src);
+            case MAX -> foldValueMAX(src);
+            case MIN -> foldValueMIN(src);
+            case AND -> foldValueAND(src);
+            case AND_NOT -> foldValueAND_NOT(src);
+            case OR -> foldValueOR(src);
+            case XOR -> foldValueXOR(src);
+            case COUNT -> foldValueCOUNT(src);
+          };
+        } catch(RuntimeException | Error e) {
+          throw e;
+        } catch(Throwable e) {
+          throw new AssertionError(e);
+        }
       }
       return ClassicBackend.foldValueGeneric(src, dyad.zero(), dyad);
     }
@@ -507,7 +517,7 @@ public final class Cell {
     abstract int[] applyBinaryXOR(int[] src1, int[] src2);
     abstract int[] applyBinaryCOUNT(int[] src1, int[] src2);
 
-    abstract int foldValueADD(int[] src);
+    abstract int foldValueADD(int[] src) throws Throwable;
     abstract int foldValueSUB(int[] src);
     abstract int foldValueMUL(int[] src);
     abstract int foldValueDIV(int[] src);
@@ -701,158 +711,399 @@ public final class Cell {
       return "Vectorized - lanes: " + SPECIES.length() + "  shape: " + SPECIES.vectorShape();
     }
 
-    int[] applyUnaryZOMO(int[] src) { return applyUnaryTemplate(src, x -> x == 0? 0: -1, VectorOperators.ZOMO);  }
-    int[] applyUnaryNEG(int[] src) { return applyUnaryTemplate(src, x -> -x, VectorOperators.NEG);  }
-    int[] applyUnaryABS(int[] src) { return applyUnaryTemplate(src, Math::abs, VectorOperators.ABS);  }
-    int[] applyUnaryNOT(int[] src) { return applyUnaryTemplate(src, x -> ~x, VectorOperators.NOT);  }
+    private static class ClassParser {
+      private static final int UTF8_ENTRY = 1;
+      private static final int INTEGER_ENTRY = 3;
+      private static final int FLOAT_ENTRY = 4;
+      private static final int LONG_ENTRY = 5;
+      private static final int DOUBLE_ENTRY= 6;
+      private static final int CLASS_ENTRY = 7;
+      private static final int STRING_ENTRY = 8;
+      private static final int FIELDREF_ENTRY = 9;
+      private static final int CLASS_METHODREF_ENTRY = 10;
+      private static final int INTERFACE_METHODREF_ENTRY = 11;
+      private static final int NAME_AND_TYPE_ENTRY = 12;
+      private static final int METHOD_HANDLE_ENTRY = 15;
+      private static final int METHOD_TYPE_ENTRY = 16;
+      private static final int CONSTANT_DYNAMIC_ENTRY = 17;
+      private static final int INVOKE_DYNAMIC_ENTRY = 18;
+      private static final int MODULE_ENTRY = 19;
+      private static final int PACKAGE_ENTRY = 20;
 
-    int[] applyBinaryADD(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, Integer::sum, VectorOperators.ADD); }
-    int[] applyBinarySUB(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a - b, VectorOperators.SUB); }
-    int[] applyBinaryMUL(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a * b, VectorOperators.MUL); }
-    int[] applyBinaryDIV(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a / b, VectorOperators.DIV); }
-    int[] applyBinaryMAX(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, Math::max, VectorOperators.MAX); }
-    int[] applyBinaryMIN(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, Math::min, VectorOperators.MIN); }
-    int[] applyBinaryAND(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a & b, VectorOperators.AND); }
-    int[] applyBinaryAND_NOT(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
-    int[] applyBinaryOR(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a & ~b, VectorOperators.OR); }
-    int[] applyBinaryXOR(int[] src1, int[] src2) { return applyBinaryTemplate(src1, src2, (a, b) -> a ^b, VectorOperators.XOR); }
+      private static int readUnsignedShort(byte[] bytes, int index) {
+        return ((bytes[index] & 0xFF) << 8) | (bytes[index + 1] & 0xFF);
+      }
+
+      private static String readUtf8(byte[] bytes, int offset, int utf8Length) {
+        var buffer = new char[utf8Length];
+        var strLength = 0;
+        for (var i = 0; i < utf8Length;) {
+          var firstByte = bytes[offset + i++];
+          if ((firstByte & 0x80) == 0) {   // type 1
+            buffer[strLength++] = (char) (firstByte & 0x7F);
+            continue;
+          }
+          if ((firstByte & 0xE0) == 0xC0) { // type 2
+            buffer[strLength++] =
+                (char) (((firstByte & 0x1F) << 6) + (bytes[offset + i++] & 0x3F));
+            continue;
+          }
+          // type 3
+          buffer[strLength++] =
+              (char)
+                  (((firstByte & 0xF) << 12)
+                      + ((bytes[offset + i++] & 0x3F) << 6)
+                      + (bytes[offset + i++] & 0x3F));
+        }
+        return new String(buffer, 0, strLength);
+      }
+
+      private static int[] scanForHoleIndexes(String[] holes, byte[] bytes) {
+        var holeMap = range(0, holes.length).boxed().collect(toMap(i -> holes[i], i -> i));
+
+        var size = readUnsignedShort(bytes, 8);
+        var utf8s = new int[size];
+        var strings = new int[size];
+
+        var byteOffset = 10;
+        for (var index = 1; index < size; index++) {
+          var entryTag = bytes[byteOffset];
+          byteOffset += switch (entryTag) {
+            case CLASS_ENTRY,
+                METHOD_TYPE_ENTRY,
+                PACKAGE_ENTRY,
+                MODULE_ENTRY -> 3;
+            case METHOD_HANDLE_ENTRY -> 4;
+            case FIELDREF_ENTRY,
+                CLASS_METHODREF_ENTRY,
+                INTERFACE_METHODREF_ENTRY,
+                INTEGER_ENTRY,
+                FLOAT_ENTRY,
+                NAME_AND_TYPE_ENTRY,
+                CONSTANT_DYNAMIC_ENTRY,
+                INVOKE_DYNAMIC_ENTRY -> 5;
+            case LONG_ENTRY,
+                DOUBLE_ENTRY ->  {
+              index++;
+              yield 9;
+            }
+            case UTF8_ENTRY -> {
+              var utf8Length = readUnsignedShort(bytes, byteOffset + 1);
+              var string = readUtf8(bytes, byteOffset + 3, utf8Length);
+              utf8s[index] = holeMap.getOrDefault(string, -1);
+              yield 3 + utf8Length;
+            }
+            case STRING_ENTRY -> {
+              var utf8Index = readUnsignedShort(bytes, byteOffset + 1);
+              strings[index] = utf8Index;
+              yield 3;
+            }
+            default -> throw new AssertionError("invalid entry tag " + entryTag);
+          };
+        }
+
+        var holeIndexes = new int[holes.length];
+        for(var i = 0; i < size; i++) {
+          var utf8Index = strings[i];
+          if (utf8Index != 0) {
+            var holeIndex = utf8s[utf8Index];
+            if (holeIndex != -1) {
+              holeIndexes[holeIndex] = i;
+            }
+          }
+        }
+        return holeIndexes;
+      }
+    }
+
+    private static final class Specializer {
+      private final Unsafe unsafe;
+      private final byte[] data;
+      private final int holeIndex1;
+      private final int holeIndex2;
+      private final int holeIndex3;
+      private final int patchesLength;
+
+      Specializer(Unsafe unsafe, byte[] data, int holeIndex1, int holeIndex2, int holeIndex3) {
+        this.unsafe = unsafe;
+        this.data = data;
+        this.holeIndex1 = holeIndex1;
+        this.holeIndex2 = holeIndex2;
+        this.holeIndex3 = holeIndex3;
+        this.patchesLength = 1 + Math.max(Math.max(holeIndex1, holeIndex2), holeIndex3);
+      }
+
+      Template specialize(IntUnaryOperator op, Unary unary) {
+        return specializeHoles(op, unary, null);
+      }
+      Template specialize(int zero, IntBinaryOperator op, Associative assoc) {
+        return specializeHoles(zero, op, assoc);
+      }
+      Template specialize(int zero, IntBinaryOperator op, Binary binary) {
+        return specializeHoles(zero, op, binary);
+      }
+
+      private Template specializeHoles(Object hole1, Object hole2, Object hole3) {
+        var patches = new Object[patchesLength];
+        patches[holeIndex1] = hole1;
+        patches[holeIndex2] = hole2;
+        patches[holeIndex3] = hole3;
+        var snippetClass = unsafe.defineAnonymousClass(VectorizedBackend.class, data, patches);
+
+        try {
+          var constructor = snippetClass.getConstructor();
+          return (Template)constructor.newInstance();
+        } catch (ReflectiveOperationException e) {
+          throw new AssertionError(e);
+        }
+      }
+    }
+
+
+    private static final Template SNIPPET_ZOMO, SNIPPET_NEG, SNIPPET_ABS, SNIPPET_NOT,
+        SNIPPET_MAX, SNIPPET_MIN, SNIPPET_AND, SNIPPET_AND_NOT, SNIPPET_OR, SNIPPET_XOR;
+    private static final Template SNIPPET_ADD, SNIPPET_SUB, SNIPPET_MUL, SNIPPET_DIV;
+    static {
+      Specializer specializer;
+      try {
+        var field = Unsafe.class.getDeclaredField("theUnsafe");
+        field.setAccessible(true);
+        var unsafe = (Unsafe)field.get(null);
+
+        byte[] data;
+        try(var input = Snippet.class.getResourceAsStream("/" + Snippet.class.getName().replace('.', '/') + ".class")) {
+          data = input.readAllBytes();
+        }
+
+        var holeIndexes = ClassParser.scanForHoleIndexes(new String[] { "HOLE1", "HOLE2", "HOLE3"}, data);
+        specializer = new Specializer(unsafe, data, holeIndexes[0], holeIndexes[1], holeIndexes[2]);
+
+      } catch (ReflectiveOperationException | IOException e) {
+        throw new AssertionError(e);
+      }
+
+      SNIPPET_ZOMO = specializer.specialize(x -> x == 0? 0: -1, VectorOperators.ZOMO);
+      SNIPPET_NEG = specializer.specialize(x -> -x, VectorOperators.NEG);
+      SNIPPET_ABS = specializer.specialize(Math::abs, VectorOperators.ABS);
+      SNIPPET_NOT = specializer.specialize(x -> ~x, VectorOperators.NOT);
+
+      SNIPPET_ADD = specializer.specialize(0, Integer::sum, VectorOperators.ADD);
+      SNIPPET_SUB = specializer.specialize(0, (a, b) -> a - b, VectorOperators.SUB);
+      SNIPPET_MUL = specializer.specialize(1, (a, b) -> a * b, VectorOperators.MUL);
+      SNIPPET_DIV = specializer.specialize(1, (a, b) -> a / b, VectorOperators.DIV);
+      SNIPPET_MAX = specializer.specialize(Integer.MIN_VALUE, Math::max, VectorOperators.MAX);
+      SNIPPET_MIN = specializer.specialize(Integer.MAX_VALUE, Math::min, VectorOperators.MIN);
+      SNIPPET_AND = specializer.specialize(0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND);
+      SNIPPET_AND_NOT = specializer.specialize(0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT);
+      SNIPPET_OR = specializer.specialize(0, (a, b) -> a | b, VectorOperators.OR);
+      SNIPPET_XOR = specializer.specialize(0, (a, b) -> a ^ b, VectorOperators.XOR);
+    }
+
+    int[] applyUnaryZOMO(int[] src) { return SNIPPET_ZOMO.applyUnary(src);  }
+    int[] applyUnaryNEG(int[] src) { return SNIPPET_NEG.applyUnary(src);  }
+    int[] applyUnaryABS(int[] src) { return SNIPPET_ABS.applyUnary(src);  }
+    int[] applyUnaryNOT(int[] src) { return SNIPPET_NOT.applyUnary(src);  }
+
+    int[] applyBinaryADD(int[] src1, int[] src2) { return SNIPPET_ADD.applyBinary(src1, src2); }
+    int[] applyBinarySUB(int[] src1, int[] src2) { return SNIPPET_SUB.applyBinary(src1, src2); }
+    int[] applyBinaryMUL(int[] src1, int[] src2) { return SNIPPET_MUL.applyBinary(src1, src2); }
+    int[] applyBinaryDIV(int[] src1, int[] src2) { return SNIPPET_DIV.applyBinary(src1, src2); }
+    int[] applyBinaryMAX(int[] src1, int[] src2) { return SNIPPET_MAX.applyBinary(src1, src2); }
+    int[] applyBinaryMIN(int[] src1, int[] src2) { return SNIPPET_MIN.applyBinary(src1, src2); }
+    int[] applyBinaryAND(int[] src1, int[] src2) { return SNIPPET_AND.applyBinary(src1, src2); }
+    int[] applyBinaryAND_NOT(int[] src1, int[] src2) { return SNIPPET_AND_NOT.applyBinary(src1, src2); }
+    int[] applyBinaryOR(int[] src1, int[] src2) { return SNIPPET_OR.applyBinary(src1, src2); }
+    int[] applyBinaryXOR(int[] src1, int[] src2) { return SNIPPET_XOR.applyBinary(src1, src2); }
     int[] applyBinaryCOUNT(int[] src1, int[] src2) { return ClassicBackend.applyBinaryGeneric(src1, src2, (a, b) -> a + 1); }
 
-    int foldValueADD(int[] src) { return foldValueTemplate(src, 0, Integer::sum, VectorOperators.ADD); }
-    int foldValueSUB(int[] src) { return foldValueTemplate(src, 0, (a, b) -> a - b, VectorOperators.SUB); }
-    int foldValueMUL(int[] src) { return foldValueTemplate(src, 1, (a, b) -> a * b, VectorOperators.MUL); }
-    int foldValueDIV(int[] src) { return foldValueTemplate(src, 1, (a, b) -> a / b, VectorOperators.DIV); }
-    int foldValueMAX(int[] src) { return foldValueTemplate(src, Integer.MIN_VALUE, Math::max, VectorOperators.MAX); }
-    int foldValueMIN(int[] src) { return foldValueTemplate(src, Integer.MAX_VALUE, Math::min, VectorOperators.MIN); }
-    int foldValueAND(int[] src) { return foldValueTemplate(src, 0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND); }
-    int foldValueAND_NOT(int[] src) { return foldValueTemplate(src, 0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
-    int foldValueOR(int[] src) { return foldValueTemplate(src, 0, (a, b) -> a | b, VectorOperators.OR); }
-    int foldValueXOR(int[] src) { return foldValueTemplate(src, 0, (a, b) -> a ^ b, VectorOperators.XOR); }
+    int foldValueADD(int[] src) { return SNIPPET_ADD.foldValueAssoc(src); }
+    int foldValueSUB(int[] src) { return SNIPPET_SUB.foldValueBinary(src); }
+    int foldValueMUL(int[] src) { return SNIPPET_MUL.foldValueAssoc(src); }
+    int foldValueDIV(int[] src) { return SNIPPET_DIV.foldValueBinary(src); }
+    int foldValueMAX(int[] src) { return SNIPPET_MAX.foldValueAssoc(src); }
+    int foldValueMIN(int[] src) { return SNIPPET_MIN.foldValueAssoc(src); }
+    int foldValueAND(int[] src) { return SNIPPET_ADD.foldValueAssoc(src); }
+    int foldValueAND_NOT(int[] src) { return SNIPPET_AND_NOT.foldValueBinary(src); }
+    int foldValueOR(int[] src) { return SNIPPET_OR.foldValueAssoc(src); }
+    int foldValueXOR(int[] src) { return SNIPPET_XOR.foldValueAssoc(src); }
     int foldValueCOUNT(int[] src) { return ClassicBackend.foldValueGeneric(src, 0, (a, b) -> a + 1); }
 
-    void foldVectorRowADD(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0, Integer::sum, VectorOperators.ADD); }
-    void foldVectorRowSUB(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a - b, VectorOperators.SUB); }
-    void foldVectorRowMUL(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 1, (a, b) -> a * b, VectorOperators.MUL); }
-    void foldVectorRowDIV(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 1, (a, b) -> a / b, VectorOperators.DIV); }
-    void foldVectorRowMAX(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, Integer.MIN_VALUE, Math::max, VectorOperators.MAX); }
-    void foldVectorRowMIN(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, Integer.MAX_VALUE, Math::min, VectorOperators.MIN); }
-    void foldVectorRowAND(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND); }
-    void foldVectorRowAND_NOT(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
-    void foldVectorRowOR(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a | b, VectorOperators.OR); }
-    void foldVectorRowXOR(int[] dst, int[] src, int rowCount, int columnCount) { foldVectorRowTemplate(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a ^ b, VectorOperators.XOR); }
+    void foldVectorRowADD(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_ADD.foldVectorRowAssoc(dst, 0, src, 0, rowCount, columnCount); }
+    void foldVectorRowSUB(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_SUB.foldVectorRowBinary(dst, 0, src, 0, rowCount, columnCount); }
+    void foldVectorRowMUL(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_MUL.foldVectorRowAssoc(dst, 0, src, 0, rowCount, columnCount); }
+    void foldVectorRowDIV(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_DIV.foldVectorRowBinary(dst, 0, src, 0, rowCount, columnCount); }
+    void foldVectorRowMAX(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_MAX.foldVectorRowAssoc(dst, 0, src, 0, rowCount, columnCount); }
+    void foldVectorRowMIN(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_MIN.foldVectorRowAssoc(dst, 0, src, 0, rowCount, columnCount); }
+    void foldVectorRowAND(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_AND.foldVectorRowAssoc(dst, 0, src, 0, rowCount, columnCount); }
+    void foldVectorRowAND_NOT(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_AND_NOT.foldVectorRowBinary(dst, 0, src, 0, rowCount, columnCount); }
+    void foldVectorRowOR(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_OR.foldVectorRowAssoc(dst, 0, src, 0, rowCount, columnCount); }
+    void foldVectorRowXOR(int[] dst, int[] src, int rowCount, int columnCount) { SNIPPET_XOR.foldVectorRowAssoc(dst, 0, src, 0, rowCount, columnCount); }
     void foldVectorRowCOUNT(int[] dst, int[] src, int rowCount, int columnCount) { ClassicBackend.foldVectorRowGeneric(dst, 0, src, 0, rowCount, columnCount, 0, (a, b) -> a + 1); }
 
-    void foldVectorRowADD(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, Integer::sum, VectorOperators.ADD); }
-    void foldVectorRowSUB(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a - b, VectorOperators.SUB); }
-    void foldVectorRowMUL(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 1, (a, b) -> a * b, VectorOperators.MUL); }
-    void foldVectorRowDIV(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 1, (a, b) -> a / b, VectorOperators.DIV); }
-    void foldVectorRowMAX(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, Integer.MIN_VALUE, Math::max, VectorOperators.MAX); }
-    void foldVectorRowMIN(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, Integer.MAX_VALUE, Math::min, VectorOperators.MIN); }
-    void foldVectorRowAND(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & b, VectorOperators.AND); }
-    void foldVectorRowAND_NOT(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0xFFFFFFFF, (a, b) -> a & ~b, VectorOperators.AND_NOT); }
-    void foldVectorRowOR(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a | b, VectorOperators.OR); }
-    void foldVectorRowXOR(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { foldVectorRowTemplate(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a ^ b, VectorOperators.XOR); }
+    void foldVectorRowADD(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_ADD.foldVectorRowAssoc(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
+    void foldVectorRowSUB(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_SUB.foldVectorRowBinary(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
+    void foldVectorRowMUL(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_MUL.foldVectorRowAssoc(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
+    void foldVectorRowDIV(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_DIV.foldVectorRowBinary(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
+    void foldVectorRowMAX(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_MAX.foldVectorRowAssoc(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
+    void foldVectorRowMIN(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_MIN.foldVectorRowAssoc(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
+    void foldVectorRowAND(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_AND.foldVectorRowAssoc(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
+    void foldVectorRowAND_NOT(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_AND_NOT.foldVectorRowBinary(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
+    void foldVectorRowOR(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_OR.foldVectorRowAssoc(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
+    void foldVectorRowXOR(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { SNIPPET_XOR.foldVectorRowAssoc(dst, dstOffset, src, srcOffset, rowCount, columnCount); }
     void foldVectorRowCOUNT(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) { ClassicBackend.foldVectorRowGeneric(dst, dstOffset, src, srcOffset, rowCount, columnCount, 0, (a, b) -> a + 1); }
 
 
-    private static int[] applyUnaryTemplate(int[] src, IntUnaryOperator op, Unary unary) {
-      var data = new int[src.length];
-      var i = 0;
-      var limit = src.length - (src.length % SPECIES.length());
-      for (; i < limit; i += SPECIES.length()) {
-        var v = IntVector.fromArray(SPECIES, src, i);
-        var vr = v.lanewise(unary);                              // apply lanewise
-        vr.intoArray(data, i);
+    private static abstract class Template {
+      /*package private*/ Template() {
+        // empty constructor
       }
-      for (; i < src.length; i++) {                              // post loop
-        data[i] = op.applyAsInt(src[i]);
-      }
-      return data;
-    }
-    private static int[] applyBinaryTemplate(int[] src1, int[] src2, IntBinaryOperator op, Binary binary) {
-      var data = new int[src1.length];
-      var i = 0;
-      var limit = src1.length - (src1.length % SPECIES.length());
-      for (; i < limit; i += SPECIES.length()) {
-        var v1 = IntVector.fromArray(SPECIES, src1, i);
-        var v2 = IntVector.fromArray(SPECIES, src2, i);
-        var vr = v1.lanewise(binary, v2);                       // apply lanewise
-        vr.intoArray(data, i);
-      }
-      for (; i < src1.length; i++) {                            // post loop
-        data[i] = op.applyAsInt(src1[i], src2[i]);
-      }
-      return data;
-    }
-    private static int foldValueTemplate(int[] src, int zero, IntBinaryOperator op, Associative assoc) {
-      var acc = IntVector.broadcast(SPECIES, zero);
-      var i = 0;
-      var limit = src.length - (src.length % SPECIES.length());
-      for (; i < limit; i += SPECIES.length()) {                // reduce lanewise
-        var vector = IntVector.fromArray(SPECIES, src, i);
-        acc = acc.lanewise(assoc, vector) ;
-      }
-      var result = acc.reduceLanes(assoc);                      // reduce the lane
-      for (; i < src.length; i++) {                             // post loop
-        result = op.applyAsInt(result, src[i]);
-      }
-      return result;
-    }
-    private static int foldValueTemplate(int[] src, int zero, IntBinaryOperator op, Binary binary) {
-      var acc = IntVector.broadcast(SPECIES, zero);
-      var i = 0;
-      var limit = src.length - (src.length % SPECIES.length());
-      for (; i < limit; i += SPECIES.length()) {                // reduce lanewise
-        var vector = IntVector.fromArray(SPECIES, src, i);
-        acc = acc.lanewise(binary, vector) ;
-      }
-      var result = zero;
-      for (; i < src.length; i++) {                             // post loop
-        result = op.applyAsInt(result, src[i]);
-      }
-      for(var value: acc.toIntArray()) {                        // reduce the lane
-        result = op.applyAsInt(result, value);
-      }
-      return result;
-    }
-    private static void foldVectorRowTemplate(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount, int zero, IntBinaryOperator op, Associative assoc) {
-      var index = srcOffset;
-      for(var j = 0; j < rowCount; j++) {
-        var acc = IntVector.broadcast(SPECIES, zero);
-        var i = 0;
-        var limit = columnCount - (columnCount % SPECIES.length());
-        for(; i < limit; i += SPECIES.length()) {             // reduce lane wise
-          var vector = IntVector.fromArray(SPECIES, src, index + i);
-          acc = acc.lanewise(assoc, vector) ;
-        }
-        var result = acc.reduceLanes(assoc);                  // reduce the lane
-        for (; i < columnCount; i++) {                        // post loop
-          result = op.applyAsInt(result, src[index + i]);
-        }
-        dst[dstOffset + j] = result;
-        index += columnCount;
-      }
+
+      abstract int[] applyUnary(int[] src);
+      abstract int[] applyBinary(int[] src1, int[] src2);
+      abstract int foldValueAssoc(int[] src);
+      abstract int foldValueBinary(int[] src);
+      abstract void foldVectorRowAssoc(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount);
+      abstract void foldVectorRowBinary(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount);
     }
 
-    private static void foldVectorRowTemplate(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount, int zero, IntBinaryOperator op, Binary binary) {
-      var index = srcOffset;
-      for(var j = 0; j < rowCount; j++) {
+    public static final class Snippet extends Template {
+      int[] applyUnary(int[] src) {
+        // prologue
+        IntUnaryOperator op = (IntUnaryOperator)(Object)"HOLE1";
+        Unary unary = (Unary)(Object)"HOLE2";
+
+        // main
+        var data = new int[src.length];
+        var i = 0;
+        var limit = src.length - (src.length % SPECIES.length());
+        for (; i < limit; i += SPECIES.length()) {
+          var v = IntVector.fromArray(SPECIES, src, i);
+          var vr = v.lanewise(unary);                              // apply lanewise
+          vr.intoArray(data, i);
+        }
+        for (; i < src.length; i++) {                              // post loop
+          data[i] = op.applyAsInt(src[i]);
+        }
+        return data;
+      }
+
+      int[] applyBinary(int[] src1, int[] src2) {
+        // prologue
+        IntBinaryOperator op = (IntBinaryOperator)(Object)"HOLE2";
+        Binary binary = (Binary)(Object)"HOLE3";
+
+        // main
+        var data = new int[src1.length];
+        var i = 0;
+        var limit = src1.length - (src1.length % SPECIES.length());
+        for (; i < limit; i += SPECIES.length()) {
+          var v1 = IntVector.fromArray(SPECIES, src1, i);
+          var v2 = IntVector.fromArray(SPECIES, src2, i);
+          var vr = v1.lanewise(binary, v2);                       // apply lanewise
+          vr.intoArray(data, i);
+        }
+        for (; i < src1.length; i++) {                            // post loop
+          data[i] = op.applyAsInt(src1[i], src2[i]);
+        }
+        return data;
+      }
+
+      int foldValueAssoc(int[] src) {
+        // prologue
+        int zero = (int)(Object)"HOLE1";
+        IntBinaryOperator op = (IntBinaryOperator)(Object)"HOLE2";
+        Associative assoc = (Associative)(Object)"HOLE3";
+
+        // main
         var acc = IntVector.broadcast(SPECIES, zero);
         var i = 0;
-        var limit = columnCount - (columnCount % SPECIES.length());
-        for(; i < limit; i += SPECIES.length()) {             // reduce lane wise
-          var vector = IntVector.fromArray(SPECIES, src, index + i);
+        var limit = src.length - (src.length % SPECIES.length());
+        for (; i < limit; i += SPECIES.length()) {                // reduce lanewise
+          var vector = IntVector.fromArray(SPECIES, src, i);
+          acc = acc.lanewise(assoc, vector) ;
+        }
+        var result = acc.reduceLanes(assoc);                      // reduce the lane
+        for (; i < src.length; i++) {                             // post loop
+          result = op.applyAsInt(result, src[i]);
+        }
+        return result;
+      }
+
+      int foldValueBinary(int[] src) {
+        // prologue
+        int zero = (int)(Object)"HOLE1";
+        IntBinaryOperator op = (IntBinaryOperator)(Object)"HOLE2";
+        Binary binary = (Binary)(Object)"HOLE3";
+
+        // main
+        var acc = IntVector.broadcast(SPECIES, zero);
+        var i = 0;
+        var limit = src.length - (src.length % SPECIES.length());
+        for (; i < limit; i += SPECIES.length()) {                // reduce lanewise
+          var vector = IntVector.fromArray(SPECIES, src, i);
           acc = acc.lanewise(binary, vector) ;
         }
         var result = zero;
-        for (; i < columnCount; i++) {                       // post loop
-          result = op.applyAsInt(result, src[index + i]);
+        for (; i < src.length; i++) {                             // post loop
+          result = op.applyAsInt(result, src[i]);
         }
-        for(var value: acc.toIntArray()) {                  // reduce the lane
+        for(var value: acc.toIntArray()) {                        // reduce the lane
           result = op.applyAsInt(result, value);
         }
-        dst[dstOffset + j] = result;
-        index += columnCount;
+        return result;
+      }
+
+      void foldVectorRowAssoc(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) {
+        // prologue , int zero, IntBinaryOperator op, Associative assoc
+        int zero = (int)(Object)"HOLE1";
+        IntBinaryOperator op = (IntBinaryOperator)(Object)"HOLE2";
+        Associative assoc = (Associative)(Object)"HOLE3";
+
+        // main
+        var index = srcOffset;
+        for(var j = 0; j < rowCount; j++) {
+          var acc = IntVector.broadcast(SPECIES, zero);
+          var i = 0;
+          var limit = columnCount - (columnCount % SPECIES.length());
+          for(; i < limit; i += SPECIES.length()) {             // reduce lane wise
+            var vector = IntVector.fromArray(SPECIES, src, index + i);
+            acc = acc.lanewise(assoc, vector) ;
+          }
+          var result = acc.reduceLanes(assoc);                  // reduce the lane
+          for (; i < columnCount; i++) {                        // post loop
+            result = op.applyAsInt(result, src[index + i]);
+          }
+          dst[dstOffset + j] = result;
+          index += columnCount;
+        }
+      }
+
+      void foldVectorRowBinary(int[] dst, int dstOffset, int[] src, int srcOffset, int rowCount, int columnCount) {
+        // prologue
+        int zero = (int)(Object)"HOLE1";
+        IntBinaryOperator op = (IntBinaryOperator)(Object)"HOLE2";
+        Binary binary = (Binary)(Object)"HOLE3";
+
+        // main
+        var index = srcOffset;
+        for(var j = 0; j < rowCount; j++) {
+          var acc = IntVector.broadcast(SPECIES, zero);
+          var i = 0;
+          var limit = columnCount - (columnCount % SPECIES.length());
+          for(; i < limit; i += SPECIES.length()) {             // reduce lane wise
+            var vector = IntVector.fromArray(SPECIES, src, index + i);
+            acc = acc.lanewise(binary, vector) ;
+          }
+          var result = zero;
+          for (; i < columnCount; i++) {                       // post loop
+            result = op.applyAsInt(result, src[index + i]);
+          }
+          for(var value: acc.toIntArray()) {                  // reduce the lane
+            result = op.applyAsInt(result, value);
+          }
+          dst[dstOffset + j] = result;
+          index += columnCount;
+        }
       }
     }
   }

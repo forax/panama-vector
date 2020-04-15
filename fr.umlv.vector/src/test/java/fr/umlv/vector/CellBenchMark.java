@@ -24,7 +24,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 // /path/to/jdk-15-vector/bin/java --enable-preview --module-path target/test/artifact:deps  -Dfr.umlv.jruntime.vectorized=true  -m fr.umlv.vector/fr.umlv.vector.CellBenchMark
 @SuppressWarnings("static-method")
-@Warmup(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = 10, time = 5, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 5, timeUnit = TimeUnit.SECONDS)
 @Fork(value = 1)
 @BenchmarkMode(Mode.AverageTime)
@@ -33,7 +33,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 public class CellBenchMark {
   private static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
 
-  private int[] array = new Random(0).ints(1_000_000, 0,1_000_000).toArray();
+  private int[] array = new Random(0).ints(1_000_000, 0,100).toArray();
   private Cell cell = Cell.of(array);
 
   @Benchmark

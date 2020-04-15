@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/fr.umlv.jruntime/fr.umlv.jruntime.iml" filepath="$PROJECT_DIR$/fr.umlv.jruntime/fr.umlv.jruntime.iml" />
-      <module fileurl="file://$PROJECT_DIR$/fr.umlv.jruntime.rewriter/fr.umlv.jruntime.rewriter.iml" filepath="$PROJECT_DIR$/fr.umlv.jruntime.rewriter/fr.umlv.jruntime.rewriter.iml" />
       <module fileurl="file://$PROJECT_DIR$/fr.umlv.vector/fr.umlv.vector.iml" filepath="$PROJECT_DIR$/fr.umlv.vector/fr.umlv.vector.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/panama-vector.iml" filepath="$PROJECT_DIR$/.idea/panama-vector.iml" />
     </modules>

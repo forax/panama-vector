@@ -7,9 +7,9 @@ resolver.
       checkForUpdate(true).
       dependencies(
           // JUnit 5
-          "org.junit.jupiter.api:5.6.1",
-          "org.junit.jupiter.params:5.6.1",
-          "org.junit.platform.commons:1.6.1",
+          "org.junit.jupiter.api:5.6.2",
+          "org.junit.jupiter.params:5.6.2",
+          "org.junit.platform.commons:1.6.2",
           "org.apiguardian.api:1.1.0",
           "org.opentest4j:1.2.0",
 
@@ -17,13 +17,7 @@ resolver.
           "org.openjdk.jmh=org.openjdk.jmh:jmh-core:1.23",
           "org.openjdk.jmh.generator=org.openjdk.jmh:jmh-generator-annprocess:1.23",
           "org.apache.commons.math3=org.apache.commons:commons-math3:3.3.2",
-          "net.sf.jopt-simple=net.sf.jopt-simple:jopt-simple:4.6",
-
-          // ASM 8
-          "org.objectweb.asm:8.0.1",
-          "org.objectweb.asm.commons:8.0.1",
-          "org.objectweb.asm.tree:8.0.1",
-          "org.objectweb.asm.tree.analysis:8.0.1"
+          "net.sf.jopt-simple=net.sf.jopt-simple:jopt-simple:4.6"
       )
 
 compiler.
@@ -35,7 +29,6 @@ compiler.
 packager.
       modules(
           "fr.umlv.jruntime@1.0/fr.umlv.jruntime.Main",
-          "fr.umlv.jruntime.rewriter@1.0/fr.umlv.jruntime.rewriter.SnippetRewriter",
           "fr.umlv.vector@1.0/fr.umlv.vector.Main");
 
 runner.

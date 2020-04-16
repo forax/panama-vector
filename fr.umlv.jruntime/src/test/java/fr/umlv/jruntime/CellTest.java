@@ -1,13 +1,31 @@
 package fr.umlv.jruntime;
 
-import static fr.umlv.jruntime.Cell.Dyads.*;
-import static fr.umlv.jruntime.Cell.Monads.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static fr.umlv.jruntime.Cell.Dyads.ADD;
+import static fr.umlv.jruntime.Cell.Dyads.COUNT;
+import static fr.umlv.jruntime.Cell.Dyads.DIV;
+import static fr.umlv.jruntime.Cell.Dyads.MUL;
+import static fr.umlv.jruntime.Cell.Monads.NEG;
+import static fr.umlv.jruntime.Cell.Monads.ZOMO;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.IntStream.range;
+import static java.util.stream.IntStream.rangeClosed;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import fr.umlv.jruntime.Cell.Dyad;
+import fr.umlv.jruntime.Cell.Dyads;
+import fr.umlv.jruntime.Cell.Fold;
 import fr.umlv.jruntime.Cell.Monad;
+import fr.umlv.jruntime.Cell.Monads;
+import java.util.Arrays;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class CellTest {
   @Test
@@ -40,6 +58,7 @@ public class CellTest {
     ints[0] = 0;
     assertEquals(Cell.of(ints), r);
   }
+
 
   @Test
   public void applyVectorDyad() {
@@ -168,18 +187,76 @@ public class CellTest {
   }
 
   @Test
-  public void testApplyVectorFoldComplex() {
+  public void testApplyVectorFoldTerms() {
     var a = Cell.of(1, 2, 3);
     var r = a.apply(ADD.fold(DIV, COUNT));
     assertEquals(Cell.of(2), r);
   }
 
   @Test
-  public void testApplyVectorFoldComplexRank1() {
+  public void testApplyVectorFoldTermsRank1() {
     var a = Cell.of(1, 2, 3);
     var r = a.apply(ADD.fold(1, DIV, COUNT));
     assertEquals(Cell.of(2), r);
   }
+
+
+  private static Stream<Monads> allMonads() { return Arrays.stream(Monads.values()); }
+  private static Stream<Dyads> allDyads() { return Arrays.stream(Dyads.values()); }
+  private static Stream<Cell> allCells() {
+    var cell = Cell.of(rangeClosed(1, 4*5*6).toArray());
+    return Stream.of(Cell.of(4), Cell.of(4, 5), Cell.of(4, 5, 6)).map(c -> c.reshape(cell));
+  }
+
+  private static Stream<Arguments> provideCellsAndMonads() {
+    return allMonads().flatMap(monads -> allCells().map(cell -> Arguments.of(cell, monads)));
+  }
+  private static Stream<Arguments> provideCellsAndDyads() {
+    return allDyads().flatMap(dyads -> allCells().flatMap(left -> allCells().map(right -> Arguments.of(left, dyads, right))));
+  }
+  private static Stream<Arguments> provideCellsAndFolds() {
+    var cells = allCells().collect(toList());
+    return range(0, cells.size()).boxed().flatMap(dim -> allDyads().flatMap(dyads -> range(1, dim + 1).boxed().map(rank -> Arguments.of(cells.get(dim), dyads.fold(rank)))));
+  }
+  private static Stream<Arguments> provideCellsAndFoldTerms() {
+    var cells = allCells().collect(toList());
+    return range(0, cells.size()).boxed().flatMap(dim -> allDyads().flatMap(dyads -> range(1, dim + 1).boxed().map(rank -> Arguments.of(cells.get(dim), dyads.fold(rank, /*DIV*/ MUL, COUNT)))));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideCellsAndMonads")
+  public void applyMonad(Cell a, Monads monads) {
+    var r = a.apply(monads);
+    assertNotNull(r);
+  }
+  @ParameterizedTest
+  @MethodSource("provideCellsAndDyads")
+  public void applyDyad(Cell left, Dyads dyads, Cell right) {
+    if (dyads == DIV) {  //TODO skip the test for now, vectorized API with DIV as Binary doesn't work
+      return;
+    }
+    Supplier<Cell> supplier = () -> left.apply(dyads, right);
+
+    if (Arrays.equals(left.dims(), right.dims())) {
+      var r = supplier.get();
+      assertNotNull(r);
+    } else {
+      assertThrows(java.lang.IllegalArgumentException.class, supplier::get);
+    }
+  }
+  @ParameterizedTest
+  @MethodSource("provideCellsAndFolds")
+  public void applyFold(Cell a, Fold fold) {
+    var r = a.apply(fold);
+    assertNotNull(r);
+  }
+  @ParameterizedTest
+  @MethodSource("provideCellsAndFoldTerms")
+  public void applyFoldTerms(Cell a, Fold fold) {
+    var r = a.apply(fold);
+    assertNotNull(r);
+  }
+
 
   @Test
   public void iota() {

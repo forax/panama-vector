@@ -18,15 +18,15 @@ import sun.misc.Unsafe;
 
 public final class Cell {
   private /*sealed*/ interface Rank {
-    int[] depths();
-    default int elements() { return Arrays.stream(depths()).reduce(1, (a, b) -> a * b); }
+    int[] dims();
+    default int elements() { return Arrays.stream(dims()).reduce(1, (a, b) -> a * b); }
 
     // inlined by hand, see Cell#apply(Fold)
     //Cell fold(Cell self, int rank, Dyad dyad);
 
     record Vector(int column)  implements Rank {
       @Override
-      public int[] depths() { return new int[] { column }; }
+      public int[] dims() { return new int[] { column }; }
 
       public Cell fold(Cell self, int rank, Dyad dyad) {
         return foldValue(self, dyad);
@@ -38,7 +38,7 @@ public final class Cell {
     }
     record Matrix(int row, int column) implements Rank {
       @Override
-      public int[] depths() { return new int[] { row, column }; }
+      public int[] dims() { return new int[] { row, column }; }
 
       public Cell fold(Cell self, int rank, Dyad dyad) {
         return switch(rank) {
@@ -60,7 +60,7 @@ public final class Cell {
     }
     record Cube(int plane, int row, int column) implements Rank {
       @Override
-      public int[] depths() { return new int[] {plane, row, column}; }
+      public int[] dims() { return new int[] {plane, row, column}; }
 
       public Cell fold(Cell self, int rank, Dyad dyad) {
         return switch(rank) {
@@ -140,7 +140,7 @@ public final class Cell {
     //System.err.println("rank: " + rank);
     //System.err.println("data: " + Arrays.toString(data));
     var builder = new StringBuilder();
-    var depths = rank.depths();
+    var depths = rank.dims();
     int length0, length1, length2;
     switch(depths.length) {
       case 1 -> { length0 = depths[0]; length1 = 1; length2 = 1; }
@@ -326,6 +326,11 @@ public final class Cell {
     }
     return new Cell(newRank, newData);
   }
+
+  /* for testing */ int[] dims() {
+    return rank.dims();
+  }
+
 
   // --- backend implementation ---
   private static final Backend BACKEND;

@@ -1052,8 +1052,8 @@ public final class Cell {
         for (; i < src.length; i++) {                             // post loop
           result = op.applyAsInt(result, src[i]);
         }
-        for(var value: acc.toIntArray()) {                        // reduce the lane
-          result = op.applyAsInt(result, value);
+        for(var laneIndex = 0; laneIndex < SPECIES.length(); laneIndex++) {  // reduce the vector
+          result = op.applyAsInt(result, acc.lane(laneIndex));
         }
         return result;
       }
@@ -1103,8 +1103,8 @@ public final class Cell {
           for (; i < columnCount; i++) {                       // post loop
             result = op.applyAsInt(result, src[index + i]);
           }
-          for(var value: acc.toIntArray()) {                  // reduce the lane
-            result = op.applyAsInt(result, value);
+          for(var laneIndex = 0; laneIndex < SPECIES.length(); laneIndex++) {  // reduce the vector
+            result = op.applyAsInt(result, acc.lane(laneIndex));
           }
           dst[dstOffset + j] = result;
           index += columnCount;

@@ -232,9 +232,6 @@ public class CellTest {
   @ParameterizedTest
   @MethodSource("provideCellsAndDyads")
   public void applyDyad(Cell left, Dyads dyads, Cell right) {
-    if (dyads == DIV) {  //TODO skip the test for now, vectorized API with DIV as Binary doesn't work
-      return;
-    }
     Supplier<Cell> supplier = () -> left.apply(dyads, right);
 
     if (Arrays.equals(left.dims(), right.dims())) {

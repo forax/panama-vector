@@ -1,0 +1,12 @@
+dontinline,*.*_all_jmhStub
+dontinline,*.*_avgt_jmhStub
+dontinline,*.*_sample_jmhStub
+dontinline,*.*_ss_jmhStub
+dontinline,*.*_thrpt_jmhStub
+inline,fr/umlv/vector/AddBenchMark.add_loop
+inline,fr/umlv/vector/AddBenchMark.add_vector_lanewise
+inline,fr/umlv/vector/AddBenchMark.add_vector_post_loop
+inline,fr/umlv/vector/MaxBenchMark.max_loop
+inline,fr/umlv/vector/MaxBenchMark.max_vector_lanewise
+inline,fr/umlv/vector/MaxBenchMark.max_vector_mask
+inline,fr/umlv/vector/MaxBenchMark.max_vector_post_loop

@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/fr.umlv.jruntime/fr.umlv.jruntime.iml" filepath="$PROJECT_DIR$/fr.umlv.jruntime/fr.umlv.jruntime.iml" />
-      <module fileurl="file://$PROJECT_DIR$/fr.umlv.vector/fr.umlv.vector.iml" filepath="$PROJECT_DIR$/fr.umlv.vector/fr.umlv.vector.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jruntime/jruntime.iml" filepath="$PROJECT_DIR$/jruntime/jruntime.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/panama-vector.iml" filepath="$PROJECT_DIR$/.idea/panama-vector.iml" />
+      <module fileurl="file://$PROJECT_DIR$/vector/vector.iml" filepath="$PROJECT_DIR$/vector/vector.iml" />
     </modules>
   </component>
 </project>

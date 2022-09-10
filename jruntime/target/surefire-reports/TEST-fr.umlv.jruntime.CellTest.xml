@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="fr.umlv.jruntime.CellTest" time="0.245" tests="185" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="19"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/Users/forax/git/panama-vector/jruntime/target/test-classes:/Users/forax/git/panama-vector/jruntime/target/classes:/Users/forax/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.0/junit-jupiter-api-5.9.0.jar:/Users/forax/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/Users/forax/.m2/repository/org/junit/platform/junit-platform-commons/1.9.0/junit-platform-commons-1.9.0.jar:/Users/forax/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/forax/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.9.0/junit-jupiter-params-5.9.0.jar:/Users/forax/.m2/repository/org/openjdk/jmh/jmh-core/1.35/jmh-core-1.35.jar:/Users/forax/.m2/repository/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar:/Users/forax/.m2/repository/org/apache/commons/commons-math3/3.2/commons-math3-3.2.jar:/Users/forax/.m2/repository/org/openjdk/jmh/jmh-generator-annprocess/1.35/jmh-generator-annprocess-1.35.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="java.vm.specification.version" value="19"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="FR"/>
+    <property name="sun.boot.library.path" value="/Users/forax/jdk/jdk-19.jdk/Contents/Home/lib"/>
+    <property name="sun.java.command" value="/Users/forax/git/panama-vector/jruntime/target/surefire/surefirebooter-20220910171321596_3.jar /Users/forax/git/panama-vector/jruntime/target/surefire 2022-09-10T17-13-21_478-jvmRun1 surefire-20220910171321596_1tmp surefire_0-20220910171321596_2tmp"/>
+    <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/Users/forax/git/panama-vector/jruntime/target/test-classes:/Users/forax/git/panama-vector/jruntime/target/classes:/Users/forax/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.0/junit-jupiter-api-5.9.0.jar:/Users/forax/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/Users/forax/.m2/repository/org/junit/platform/junit-platform-commons/1.9.0/junit-platform-commons-1.9.0.jar:/Users/forax/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/forax/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.9.0/junit-jupiter-params-5.9.0.jar:/Users/forax/.m2/repository/org/openjdk/jmh/jmh-core/1.35/jmh-core-1.35.jar:/Users/forax/.m2/repository/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar:/Users/forax/.m2/repository/org/apache/commons/commons-math3/3.2/commons-math3-3.2.jar:/Users/forax/.m2/repository/org/openjdk/jmh/jmh-generator-annprocess/1.35/jmh-generator-annprocess-1.35.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/Users/forax"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2022-09-20"/>
+    <property name="java.home" value="/Users/forax/jdk/jdk-19.jdk/Contents/Home"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/Users/forax/git/panama-vector/jruntime"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="apple.awt.application.name" value="ForkedBooter"/>
+    <property name="surefire.real.class.path" value="/Users/forax/git/panama-vector/jruntime/target/surefire/surefirebooter-20220910171321596_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="java.runtime.version" value="19-ea+28-2110"/>
+    <property name="user.name" value="forax"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="12.5.1"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="localRepository" value="/Users/forax/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/var/folders/_m/7s_gn8j9155gcscygvvmgl4w0000gn/T/"/>
+    <property name="java.version" value="19-ea"/>
+    <property name="user.dir" value="/Users/forax/git/panama-vector/jruntime"/>
+    <property name="os.arch" value="aarch64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/forax/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="19-ea+28-2110"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
+    <property name="java.class.version" value="63.0"/>
+  </properties>
+  <testcase name="testApplyCubeFold" classname="fr.umlv.jruntime.CellTest" time="0.043"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[1]" classname="fr.umlv.jruntime.CellTest" time="0.015"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[2]" classname="fr.umlv.jruntime.CellTest" time="0.004"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[3]" classname="fr.umlv.jruntime.CellTest" time="0.005"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[4]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[5]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[6]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[7]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[8]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[9]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[10]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[11]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[12]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[13]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[14]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[15]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[16]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[17]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[18]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[19]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[20]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[21]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[22]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[23]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[24]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[25]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[26]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[27]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[28]" classname="fr.umlv.jruntime.CellTest" time="0.003"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[29]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[30]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[31]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[32]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[33]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[34]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[35]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[36]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[37]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[38]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[39]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[40]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[41]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[42]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[43]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[44]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[45]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[46]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[47]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[48]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[49]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[50]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[51]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[52]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[53]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[54]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[55]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[56]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[57]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[58]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[59]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[60]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[61]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[62]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[63]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[64]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[65]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[66]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[67]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[68]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[69]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[70]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[71]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[72]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[73]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[74]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[75]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[76]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[77]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[78]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[79]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[80]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[81]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[82]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[83]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[84]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[85]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[86]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[87]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[88]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[89]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[90]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[91]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[92]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[93]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[94]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[95]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[96]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[97]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[98]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyDyad(Cell, Dyads, Cell)[99]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[1]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFold(Cell, Fold)[2]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[3]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[4]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFold(Cell, Fold)[5]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[6]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFold(Cell, Fold)[7]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[8]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[9]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFold(Cell, Fold)[10]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[11]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[12]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFold(Cell, Fold)[13]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[14]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFold(Cell, Fold)[15]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[16]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFold(Cell, Fold)[17]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[18]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFold(Cell, Fold)[19]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[20]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[21]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[22]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFold(Cell, Fold)[23]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFold(Cell, Fold)[24]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyVectorUserDefinedMonad" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="testApplyCubeFoldRank1Big" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyCubeFoldRank2Big" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyCubeFoldRank3Big" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyCubeFoldRank1" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyCubeFoldRank2" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyCubeFoldRank3" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyMatrixFold" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyVectorFoldBig" classname="fr.umlv.jruntime.CellTest" time="0.002"/>
+  <testcase name="applyVectorDyadBig" classname="fr.umlv.jruntime.CellTest" time="0.002"/>
+  <testcase name="testApplyVectorFoldTerms" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="of" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="iota" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyMonad(Cell, Monads)[1]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyMonad(Cell, Monads)[2]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyMonad(Cell, Monads)[3]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyMonad(Cell, Monads)[4]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyMonad(Cell, Monads)[5]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyMonad(Cell, Monads)[6]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyMonad(Cell, Monads)[7]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyMonad(Cell, Monads)[8]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyMonad(Cell, Monads)[9]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyMonad(Cell, Monads)[10]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyMonad(Cell, Monads)[11]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyMonad(Cell, Monads)[12]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyVectorMonadBig" classname="fr.umlv.jruntime.CellTest" time="0.003"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[1]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[2]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[3]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[4]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[5]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[6]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[7]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[8]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[9]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[10]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[11]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[12]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[13]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[14]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[15]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[16]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[17]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[18]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[19]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[20]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[21]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[22]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[23]" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyFoldTerms(Cell, Fold)[24]" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="applyVectorUserDefinedDyad" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="reshape" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyVectorFold" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyVectorDyad" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyMatrixFoldRank1" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyMatrixFoldRank2" classname="fr.umlv.jruntime.CellTest" time="0.001"/>
+  <testcase name="testApplyMatrixFoldBig" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="applyVectorMonad" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyVectorFoldTermsRank1" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyMatrixFoldRank1Big" classname="fr.umlv.jruntime.CellTest" time="0"/>
+  <testcase name="testApplyMatrixFoldRank2Big" classname="fr.umlv.jruntime.CellTest" time="0"/>
+</testsuite>
